@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SCUM 0089服务器 - 专属生存体验</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Russo+One&family=Anton&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --server-primary: #008900;
+            --server-secondary: #00cc00;
+            --server-accent: #ff6600;
+            --server-dark: #0a0a0a;
+            --server-light: #1a1a1a;
+            --server-text: #e0e0e0;
+            --server-warning: #ff3300;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background-color: var(--server-dark);
+            color: var(--server-text);
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            line-height: 1.6;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+        
+        /* 导航栏 */
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 3px solid var(--server-primary);
+            z-index: 1000;
+            padding: 15px 0;
+        }
+        
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        
+        .logo:hover {
+            transform: scale(1.05);
+        }
+        
+        .logo-icon {
+            font-size: 2.5rem;
+            color: var(--server-primary);
+            text-shadow: 0 0 10px var(--server-secondary);
+        }
+        
+        .logo-text {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: var(--server-secondary);
+            text-shadow: 0 0 5px var(--server-primary);
+        }
+        
+        .server-id {
+            color: var(--server-accent);
+            font-size: 2.2rem;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 30px;
+        }
+        
+        .nav-link {
+            color: var(--server-text);
+            text-decoration: none;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 1.1rem;
+            padding: 10px 15px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .nav-link:hover {
+            color: var(--server-secondary);
+            background: rgba(0, 137, 0, 0.1);
+        }
+        
+        .nav-link.active {
+            color: var(--server-secondary);
+            border-bottom: 2px solid var(--server-primary);
+        }
+        
+        .nav-cta {
+            background: linear-gradient(45deg, var(--server-primary), var(--server-secondary));
+            color: white;
+            padding: 12px 25px;
+            border-radius: 5px;
+            font-weight: bold;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+            font-size: 1rem;
+            font-family: 'Orbitron', sans-serif;
+        }
+        
+        .nav-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 137, 0, 0.4);
+        }
+        
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--server-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        /* 主要内容区域 */
+        .main-content {
+            margin-top: 80px;
+            min-height: calc(100vh - 180px);
+        }
+        
+        /* 页面容器 */
+        .page {
+            display: none;
+            animation: fadeIn 0.5s ease;
+            min-height: calc(100vh - 180px);
+        }
+        
+        .page.active {
+            display: block;
+        }
+        
+        /* 英雄区域 */
+        .hero {
+            background: linear-gradient(rgba(10, 10, 10, 0.9), rgba(10, 10, 10, 0.7)),
+                        url('https://images.unsplash.com/photo-1552820728-8b83bb6b773f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            padding: 100px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero::before {
+            content: '0089';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 25rem;
+            font-family: 'Anton', sans-serif;
+            color: rgba(0, 137, 0, 0.05);
+            z-index: 1;
+            font-weight: 900;
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .hero-title {
+            font-family: 'Russo One', sans-serif;
+            font-size: 4.5rem;
+            color: var(--server-secondary);
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px var(--server-primary);
+        }
+        
+        .hero-subtitle {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            color: var(--server-text);
+            margin-bottom: 30px;
+        }
+        
+        .hero-cta {
+            display: inline-block;
+            background: linear-gradient(45deg, var(--server-primary), var(--server-accent));
+            color: white;
+            padding: 18px 40px;
+            border-radius: 8px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            border: none;
+            font-family: 'Orbitron', sans-serif;
+        }
+        
+        .hero-cta:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(255, 102, 0, 0.4);
+        }
+        
+        /* 通用内容区域 */
+        .content-section {
+            padding: 80px 20px;
+        }
+        
+        .section-title {
+            text-align: center;
+            font-family: 'Russo One', sans-serif;
+            font-size: 3rem;
+            color: var(--server-secondary);
+            margin-bottom: 50px;
+            position: relative;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: var(--server-primary);
+        }
+        
+        /* 特色卡片网格 */
+        .features-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        
+        .feature-card {
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--server-primary), var(--server-secondary));
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--server-primary);
+            box-shadow: 0 15px 30px rgba(0, 137, 0, 0.2);
+        }
+        
+        .feature-icon {
+            font-size: 3rem;
+            color: var(--server-secondary);
+            margin-bottom: 20px;
+        }
+        
+        .feature-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            color: var(--server-secondary);
+            margin-bottom: 15px;
+        }
+        
+        /* 活动卡片 */
+        .event-card {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.9);
+            border-radius: 15px;
+            overflow: hidden;
+            border: 3px solid var(--server-primary);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+        
+        .event-header {
+            background: linear-gradient(90deg, var(--server-primary), var(--server-accent));
+            padding: 25px;
+            text-align: center;
+        }
+        
+        .event-title {
+            font-family: 'Anton', sans-serif;
+            font-size: 2.5rem;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .event-body {
+            padding: 40px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        
+        .event-info h3 {
+            color: var(--server-secondary);
+            font-family: 'Orbitron', sans-serif;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+        
+        .event-details {
+            list-style: none;
+        }
+        
+        .event-details li {
+            padding: 10px 0;
+            border-bottom: 1px dashed #444;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .event-details li i {
+            color: var(--server-secondary);
+        }
+        
+        .event-cta {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding-top: 20px;
+        }
+        
+        /* 服务器信息卡片 */
+        .server-info-card {
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            padding: 40px;
+            border: 2px solid var(--server-primary);
+            margin-bottom: 30px;
+        }
+        
+        /* 规则内容 */
+        .rules-content {
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            padding: 40px;
+            border: 2px solid var(--server-primary);
+        }
+        
+        .rule-section {
+            margin-bottom: 40px;
+        }
+        
+        .rule-section h3 {
+            color: var(--server-secondary);
+            font-family: 'Orbitron', sans-serif;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        /* 联系卡片 */
+        .contact-grid {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        
+        .contact-card {
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            border: 2px solid var(--server-primary);
+            transition: all 0.3s ease;
+        }
+        
+        .contact-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 137, 0, 0.2);
+        }
+        
+        /* 页脚 */
+        .footer {
+            background: var(--server-dark);
+            padding: 60px 20px 30px;
+            border-top: 3px solid var(--server-primary);
+            margin-top: auto;
+        }
+        
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+        
+        .footer-section h3 {
+            color: var(--server-secondary);
+            font-family: 'Orbitron', sans-serif;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+        
+        .footer-links {
+            list-style: none;
+        }
+        
+        .footer-links li {
+            margin-bottom: 10px;
+        }
+        
+        .footer-links a {
+            color: var(--server-text);
+            text-decoration: none;
+            transition: color 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .footer-links a:hover {
+            color: var(--server-secondary);
+        }
+        
+        .social-links {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .social-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 137, 0, 0.2);
+            border-radius: 50%;
+            color: var(--server-secondary);
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        
+        .social-link:hover {
+            background: var(--server-primary);
+            color: white;
+            transform: translateY(-3px);
+        }
+        
+        .footer-bottom {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid #333;
+            color: #888;
+            font-size: 0.9rem;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                width: 100%;
+                background: rgba(10, 10, 10, 0.98);
+                flex-direction: column;
+                padding: 20px;
+                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            }
+            
+            .nav-links.active {
+                display: flex;
+            }
+            
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            .hero-title {
+                font-size: 3rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.4rem;
+            }
+            
+            .section-title {
+                font-size: 2.5rem;
+            }
+            
+            .event-title {
+                font-size: 2rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .hero-cta {
+                padding: 15px 30px;
+                font-size: 1.1rem;
+            }
+            
+            .section-title {
+                font-size: 2rem;
+            }
+            
+            .feature-card {
+                padding: 20px;
+            }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* 回到顶部按钮 */
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            background: var(--server-primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            opacity: 0;
+            visibility: hidden;
+            z-index: 999;
+        }
+        
+        .back-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .back-to-top:hover {
+            background: var(--server-secondary);
+            transform: translateY(-5px);
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo" onclick="switchPage('home')">
+                <div class="logo-icon">⚔️</div>
+                <div class="logo-text">SCUM <span class="server-id">0089</span></div>
+            </div>
+            
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <div class="nav-links" id="navLinks">
+                <a class="nav-link active" onclick="switchPage('home')">首页</a>
+                <a class="nav-link" onclick="switchPage('event')">活动</a>
+                <a class="nav-link" onclick="switchPage('server')">服务器</a>
+                <a class="nav-link" onclick="switchPage('rules')">规则</a>
+                <a class="nav-link" onclick="switchPage('contact')">联系</a>
+                <button class="nav-cta" onclick="joinQQGroup()">加入QQ群</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 回到顶部按钮 -->
+    <div class="back-to-top" id="backToTop" onclick="scrollToTop()">
+        <i class="fas fa-arrow-up"></i>
+    </div>
+
+    <!-- 主页 -->
+    <div id="home" class="page active">
+        <!-- 英雄区域 -->
+        <section class="hero">
+            <div class="hero-content">
+                <h1 class="hero-title">0089服务器</h1>
+                <p class="hero-subtitle">极致生存体验 · 公平竞技环境 · 活跃玩家社区</p>
+                <button class="hero-cta" onclick="switchPage('event')">查看当前活动</button>
+            </div>
+        </section>
+
+        <!-- 服务器特色 -->
+        <section class="content-section">
+            <h2 class="section-title">服务器特色</h2>
+            <div class="features-grid">
+                <div class="feature-card" onclick="switchPage('server')">
+                    <div class="feature-icon">⚡</div>
+                    <h3 class="feature-title">高性能服务器</h3>
+                    <p>稳定运行，低延迟，支持100+玩家同时在线</p>
+                </div>
+                
+                <div class="feature-card" onclick="switchPage('event')">
+                    <div class="feature-icon">🎮</div>
+                    <h3 class="feature-title">定期活动</h3>
+                    <p>每周举办特色活动，丰富游戏体验</p>
+                </div>
+                
+                <div class="feature-card" onclick="switchPage('rules')">
+                    <div class="feature-icon">🛡️</div>
+                    <h3 class="feature-title">公平竞技</h3>
+                    <p>严格反作弊，营造公平游戏环境</p>
+                </div>
+                
+                <div class="feature-card" onclick="switchPage('contact')">
+                    <div class="feature-icon">👥</div>
+                    <h3 class="feature-title">活跃社区</h3>
+                    <p>友好的玩家社区，活跃的QQ群交流</p>
+                </div>
+                
+                <div class="feature-card" onclick="switchPage('server')">
+                    <div class="feature-icon">🔄</div>
+                    <h3 class="feature-title">定期更新</h3>
+                    <p>及时更新游戏版本，体验最新内容</p>
+                </div>
+                
+                <div class="feature-card" onclick="switchPage('event')">
+                    <div class="feature-icon">🏆</div>
+                    <h3 class="feature-title">专属奖励</h3>
+                    <p>活动优胜者获得服务器专属奖励</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 当前活动 -->
+        <section class="content-section" style="background: linear-gradient(rgba(10,10,10,0.9), rgba(10,10,10,0.9)), url('https://images.unsplash.com/photo-1542751371-adc38448a05e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80'); background-size: cover; background-attachment: fixed;">
+            <h2 class="section-title">当前活动</h2>
+            <div class="event-card">
+                <div class="event-header">
+                    <h2 class="event-title">猎高达，赢徕卡！</h2>
+                </div>
+                <div class="event-body">
+                    <div class="event-info">
+                        <h3>活动时间</h3>
+                        <ul class="event-details">
+                            <li><i class="fas fa-calendar"></i> 本周日00:00 - 下周一00:00</li>
+                            <li><i class="fas fa-clock"></i> 24小时极限挑战</li>
+                            <li><i class="fas fa-server"></i> 服务器重启后开始</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="event-info">
+                        <h3>活动奖励</h3>
+                        <ul class="event-details">
+                            <li><i class="fas fa-car"></i> 传奇载具"徕卡" x1</li>
+                            <li><i class="fas fa-crown"></i> 队长称号"王霸之气" x1</li>
+                            <li><i class="fas fa-trophy"></i> 服务器荣誉榜永久记录</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="event-cta">
+                        <button class="nav-cta" onclick="switchPage('event')">查看活动详情</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- 活动页面 -->
+    <div id="event" class="page">
+        <section class="hero" style="background-image: linear-gradient(rgba(10,10,10,0.9), rgba(10,10,10,0.7)), url('https://images.unsplash.com/photo-1589256469067-ea99122bbdc4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');">
+            <div class="hero-content">
+                <h1 class="hero-title">猎高达挑战赛</h1>
+                <p class="hero-subtitle">24小时极限狩猎 · 赢取传奇奖励</p>
+            </div>
+        </section>
+        
+        <section class="content-section">
+            <div class="event-card">
+                <div class="event-header">
+                    <h2 class="event-title">活动详情</h2>
+                </div>
+                <div class="event-body">
+                    <div class="event-info">
+                        <h3>🎯 活动规则</h3>
+                        <ul class="event-details">
+                            <li><i class="fas fa-users"></i> 小队竞赛，比拼击杀高达总数</li>
+                            <li><i class="fas fa-user"></i> 个人玩家按"单人小队"统计</li>
+                            <li><i class="fas fa-shield-alt"></i> 公平竞技，严禁作弊</li>
+                            <li><i class="fas fa-robot"></i> 活动期间高达刷新率提升</li>
+                            <li><i class="fas fa-server"></i> 管理员后台数据核实</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="event-info">
+                        <h3>📝 重要提示</h3>
+                        <ul class="event-details">
+                            <li><i class="fas fa-exclamation-triangle"></i> 务必保留高达掉落物："哨兵瞄准工具"</li>
+                            <li><i class="fas fa-calculator"></i> 管理员将根据此物品计算最终结果</li>
+                            <li><i class="fas fa-clock"></i> 结果在24小时内公布</li>
+                            <li><i class="fas fa-trophy"></i> 击杀数相同按最后击杀时间判定</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="event-info">
+                        <h3>🏆 冠军奖励</h3>
+                        <ul class="event-details">
+                            <li><i class="fas fa-car"></i> 传奇载具"徕卡" x1（永久拥有）</li>
+                            <li><i class="fas fa-crown"></i> 专属称号"王霸之气"（队长）</li>
+                            <li><i class="fas fa-star"></i> 服务器荣誉榜永久记录</li>
+                            <li><i class="fas fa-medal"></i> 冠军小队专属标识</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="event-info">
+                        <h3>💡 猎手提示</h3>
+                        <ul class="event-details">
+                            <li><i class="fas fa-book"></i> 冷知识：高达弱点伤害一致</li>
+                            <li><i class="fas fa-mask"></i> 利用地形规避火力</li>
+                            <li><i class="fas fa-binoculars"></i> 望远镜侦查，避免埋伏</li>
+                            <li><i class="fas fa-medkit"></i> 携带充足医疗包、弹药、燃油</li>
+                            <li><i class="fas fa-map"></i> 优先巡逻机场、军事基地</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="event-cta">
+                        <p style="margin-bottom: 20px; color: var(--server-accent); font-size: 1.2rem;">
+                            <i class="fas fa-users"></i> QQ群：1001561046 
+                            <span style="margin-left: 20px;"><i class="fas fa-user-shield"></i> 管理员：阿豪</span>
+                        </p>
+                        <button class="nav-cta" onclick="joinQQGroup()">立即加入活动</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- 服务器页面 -->
+    <div id="server" class="page">
+        <section class="hero" style="background-image: linear-gradient(rgba(10,10,10,0.9), rgba(10,10,10,0.7)), url('https://images.unsplash.com/photo-1550745165-9bc0b252726f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');">
+            <div class="hero-content">
+                <h1 class="hero-title">服务器介绍</h1>
+                <p class="hero-subtitle">打造最佳的SCUM生存体验</p>
+            </div>
+        </section>
+        
+        <section class="content-section">
+            <div style="max-width: 1000px; margin: 0 auto;">
+                <h2 class="section-title">服务器配置</h2>
+                
+                <div class="server-info-card">
+                    <h3 style="color: var(--server-secondary); margin-bottom: 25px; font-size: 1.8rem;">
+                        <i class="fas fa-server"></i> 硬件配置
+                    </h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                        <div style="padding: 15px; border-left: 3px solid var(--server-secondary);">
+                            <h4 style="color: var(--server-secondary); margin-bottom: 10px;">💻 处理器</h4>
+                            <p>Intel Core i9-13900K / AMD Ryzen 9 7950X</p>
+                        </div>
+                        
+                        <div style="padding: 15px; border-left: 3px solid var(--server-secondary);">
+                            <h4 style="color: var(--server-secondary); margin-bottom: 10px;">🧠 内存</h4>
+                            <p>32GB DDR5 6000MHz（可扩展至64GB）</p>
+                        </div>
+                        
+                        <div style="padding: 15px; border-left: 3px solid var(--server-secondary);">
+                            <h4 style="color: var(--server-secondary); margin-bottom: 10px;">💾 存储</h4>
+                            <p>2TB NVMe SSD + 4TB HDD备份</p>
+                        </div>
+                        
+                        <div style="padding: 15px; border-left: 3px solid var(--server-secondary);">
+                            <h4 style="color: var(--server-secondary); margin-bottom: 10px;">🌐 网络</h4>
+                            <p>1Gbps带宽，BGP多线接入</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="server-info-card">
+                    <h3 style="color: var(--server-secondary); margin-bottom: 25px; font-size: 1.8rem;">
+                        <i class="fas fa-gamepad"></i> 游戏设置
+                    </h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                        <div style="padding: 15px; border-left: 3px solid var(--server-secondary);">
+                            <h4 style="color: var(--server-secondary); margin-bottom: 10px;">👥 玩家数量</h4>
+                            <p>最大100人同时在线</p>
+                        </div>
+                        
+                        <div style="padding: 15px; border-left: 3px solid var(--server-secondary);">
+                            <h4 style="color: var(--server-secondary); margin-bottom: 10px;">🧟 僵尸设置</h4>
+                            <p>中等数量，正常难度</p>
+                        </div>
+                        
+                        <div style="padding: 15px; border-left: 3px solid var(--server-secondary);">
+                            <h4 style="color: var(--server-secondary); margin-bottom: 10px;">📦 物资倍率</h4>
+                            <p>武器：2倍，医疗：2倍，食物：1.5倍</p>
+                        </div>
+                        
+                        <div style="padding: 15px; border-left: 3px solid var(--server-secondary);">
+                            <h4 style="color: var(--server-secondary); margin-bottom: 10px;">🚗 载具设置</h4>
+                            <p>刷新率：150%，燃油消耗：80%</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="server-info-card">
+                    <h3 style="color: var(--server-secondary); margin-bottom: 25px; font-size: 1.8rem;">
+                        <i class="fas fa-tools"></i> 管理维护
+                    </h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                        <div style="padding: 15px; border-left: 3px solid var(--server-secondary);">
+                            <h4 style="color: var(--server-secondary); margin-bottom: 10px;">⏰ 在线时间</h4>
+                            <p>24/7全天候运行，99.9%在线率</p>
+                        </div>
+                        
+                        <div style="padding: 15px; border-left: 3px solid var(--server-secondary);">
+                            <h4 style="color: var(--server-secondary); margin-bottom: 10px;">💾 数据备份</h4>
+                            <p>每日自动备份，保留7天备份数据</p>
+                        </div>
+                        
+                        <div style="padding: 15px; border-left: 3px solid var(--server-secondary);">
+                            <h4 style="color: var(--server-secondary); margin-bottom: 10px;">🔄 更新维护</h4>
+                            <p>游戏更新后24小时内完成同步</p>
+                        </div>
+                        
+                        <div style="padding: 15px; border-left: 3px solid var(--server-secondary);">
+                            <h4 style="color: var(--server-secondary); margin-bottom: 10px;">🛡️ 安全管理</h4>
+                            <p>实时监控，自动DDOS防护</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- 规则页面 -->
+    <div id="rules" class="page">
+        <section class="hero" style="background-image: linear-gradient(rgba(10,10,10,0.9), rgba(10,10,10,0.7)), url('https://images.unsplash.com/photo-1511512578047-dfb367046420?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');">
+            <div class="hero-content">
+                <h1 class="hero-title">服务器规则</h1>
+                <p class="hero-subtitle">遵守规则，享受公平竞技</p>
+            </div>
+        </section>
+        
+        <section class="content-section">
+            <div style="max-width: 900px; margin: 0 auto;">
+                <div class="rules-content">
+                    <div class="rule-section">
+                        <h3><i class="fas fa-ban"></i> 严禁行为</h3>
+                        <ul class="event-details">
+                            <li><i class="fas fa-times-circle"></i> 使用任何形式的外挂、作弊软件或脚本</li>
+                            <li><i class="fas fa-times-circle"></i> 利用游戏BUG获取不正当优势</li>
+                            <li><i class="fas fa-times-circle"></i> 恶意骚扰、辱骂其他玩家</li>
+                            <li><i class="fas fa-times-circle"></i> 在公屏发布广告、刷屏或不文明言论</li>
+                            <li><i class="fas fa-times-circle"></i> 故意团队击杀（Team Kill）</li>
+                            <li><i class="fas fa-times-circle"></i> 使用第三方程序修改游戏数据</li>
+                            <li><i class="fas fa-times-circle"></i> 恶意破坏服务器设施或玩家建筑</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="rule-section">
+                        <h3><i class="fas fa-check-circle"></i> 建议行为</h3>
+                        <ul class="event-details">
+                            <li><i class="fas fa-check"></i> 友好对待新玩家，互帮互助</li>
+                            <li><i class="fas fa-check"></i> 积极组队协作，享受团队游戏</li>
+                            <li><i class="fas fa-check"></i
